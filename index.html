@@ -5,47 +5,94 @@
       let a = false;
       let b = false;
       function manualChangeColor() {
-        document.getElementById("test").style.backgroundColor = a ? 'green' : 'purple';
+        document.getElementById("test").style.backgroundColor = a
+          ? "green"
+          : "purple";
         a = !a;
+      }
+      window.onmessage = function (e) {
+        document.getElementById("data").innerHTML = e.data;
+        console.log("Here");
+        var payload = JSON.parse(e.data);
+        localStorage.setItem('testStorage', JSON.stringify(payload.data));
+
+
+        // if (e.origin !== "http://example.com") {
+        //     return;
+        // }
+        // var payload = JSON.parse(e.data);
+        // switch(payload.method) {
+        //     case 'set':
+        //         localStorage.setItem(payload.key, JSON.stringify(payload.data));
+        //         break;
+        //     case 'get':
+        //         var parent = window.parent;
+        //         var data = localStorage.getItem(payload.key);
+        //         parent.postMessage(data, "*");
+        //         break;
+        //     case 'remove':
+        //         localStorage.removeItem(payload.key);
+        //         break;
+        // }
       };
-      // document.domain = "example.com";
-      window.onmessage = function(e) {
-          document.getElementById("data").innerHTML = e.data;
 
-          // if (e.origin !== "http://example.com") {
-          //     return;
-          // }
-          // var payload = JSON.parse(e.data);
-          // switch(payload.method) {
-          //     case 'set':
-          //         localStorage.setItem(payload.key, JSON.stringify(payload.data));
-          //         break;
-          //     case 'get':
-          //         var parent = window.parent;
-          //         var data = localStorage.getItem(payload.key);
-          //         parent.postMessage(data, "*");
-          //         break;
-          //     case 'remove':
-          //         localStorage.removeItem(payload.key);
-          //         break;
-          // }
-      };
+      const visitCountCookie = "visitCount";
 
+      function setCookie(cname, cvalue, exdays) {
+        const d = new Date();
+        d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+        let expires = "expires=" + d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+      }
 
-
-      function startColorChanges() {
+      function automaticColorChange() {
         window.setTimeout(() => {
-          document.getElementById("test2").style.backgroundColor = b ? 'red' : 'orange';
+          document.getElementById("test2").style.backgroundColor = b
+            ? "red"
+            : "orange";
           b = !b;
-          startColorChanges();
-        }, 2000)
+          automaticColorChange();
+        }, 2000);
+      }
+
+      function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == " ") {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return undefined;
+      }
+
+      function onPageLoad() {
+        automaticColorChange();
+        const cook = getCookie(visitCountCookie);
+        const visitCount = cook ? parseInt(cook)+1 : 1;
+        setCookie(visitCountCookie, `${visitCount}`, 30);
+        document.getElementById('visitCountText').innerHTML = `${visitCount} times`;
+        var today = new Date();   
+
+        localStorage.setItem('testStorage2',today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds());
       }
     </script>
   </head>
-  <body onload="startColorChanges();">
-    <div id="test2" style="height: 64px;width: 64px;background-color: red;"></div>
-    <div id="test" style="height: 64px;width: 64px;background-color: green;"></div>
-    <p id="data">Empty</p>
+  <body onload="onPageLoad();">
+    <div
+      id="test2"
+      style="height: 64px; width: 64px; background-color: red"
+    ></div>
+    <div
+      id="test"
+      style="height: 64px; width: 64px; background-color: green"
+    ></div>
+    <p id="data">You have visited this site: <b id="visitCountText">0 times</b></p>
     <button onClick="manualChangeColor()">Click Me!</button>
   </body>
 </html>
